@@ -12,3 +12,4 @@ A simple College ERP application developed as part of DevOps Assignment 1.
 - Assignment Management
 - Fee Payment
 - Notice and Announcement
+Feature branch: Student Login module
