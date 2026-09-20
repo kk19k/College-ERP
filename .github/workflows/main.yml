@@ -1,0 +1,75 @@
+name: College ERP CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-test-package:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Build application
+        run: |
+          echo "Building College ERP application..."
+          test -f index.html
+          test -f style.css
+          test -f README.md
+          echo "Build completed successfully."
+
+      - name: Test application
+        run: |
+          echo "Running tests..."
+          grep -q "College ERP System" index.html
+          grep -q "style.css" index.html
+          grep -q "Student Registration" index.html
+          echo "All tests passed."
+
+      - name: Package application
+        run: |
+          mkdir package
+          cp index.html style.css README.md package/
+          zip -r college-erp-package.zip package
+          echo "Application packaged successfully."
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: college-erp-package
+          path: college-erp-package.zip
+
+  deploy:
+    needs: build-test-package
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload website artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
